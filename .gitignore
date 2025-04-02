@@ -1,0 +1,13 @@
+# git ignore (SSH Key)
+*.pem
+*.key
+.ssh/
+
+# cache files
+__pycache__/
+*.py[cod]
+
+# OS files
+.DS_Store
+Thumbs.db
+
