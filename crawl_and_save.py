@@ -20,7 +20,7 @@ DB_PASS   = ""
 DB_NAME   = ""
 
 #CHROMEDRIVER_PATH = os.getenv("CHROMEDRIVER_PATH", os.path.join(os.getcwd(), "chromedriver", "chromedriver.exe"))
-CHROMEDRIVER_PATH = r"C:\Users\mbaek\OneDrive\바탕 화면\대학교\4학년\1학기\융합SW프로젝트\Workspace\dc\chromedriver\chromedriver.exe"
+CHROMEDRIVER_PATH = r""
 WEBSITES = {
     "NAVER_DATALAB":     "https://datalab.naver.com/keyword/realtimeList.naver?where=main",
     "SIGNAL_BZ":         "https://signal.bz/",
