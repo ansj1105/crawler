@@ -22,7 +22,7 @@ DB_PORT = int(os.getenv("DB_PORT", "3306"))
 DB_USER = os.getenv("DB_USER", "vietcoin")
 DB_PASS = os.getenv("DB_PASS", "vietcoin1234!")
 DB_NAME = os.getenv("DB_NAME", "craw_test")
-
+#11111
 # Get chromedriver path from environment variable
 CHROMEDRIVER_PATH = os.getenv("CHROMEDRIVER_PATH", os.path.join(os.getcwd(), "chromedriver", "chromedriver"))
 
