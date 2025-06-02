@@ -1,13 +1,18 @@
 from flask import Flask, render_template
 import mysql.connector
 from mysql.connector import Error
+from dotenv import load_dotenv
+import os
 
+# Load environment variables from .env file
+load_dotenv()
 
-DB_HOST   = "127.0.0.1"
-DB_PORT   = 3307
-DB_USER   = "sytem"
-DB_PASS   = ""          # 실제 비밀번호
-DB_NAME   = ""
+# Get database configuration from environment variables
+DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
+DB_PORT = int(os.getenv("DB_PORT", "3306"))
+DB_USER = os.getenv("DB_USER", "vietcoin")
+DB_PASS = os.getenv("DB_PASS", "vietcoin1234!")
+DB_NAME = os.getenv("DB_NAME", "craw_test")
 
 def get_db_connection():
 

@@ -1,6 +1,7 @@
 import os
 import time
 import datetime
+from dotenv import load_dotenv
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -12,15 +13,19 @@ from selenium.webdriver.support import expected_conditions as EC
 import mysql.connector
 from mysql.connector import Error
 
+# Load environment variables from .env file
+load_dotenv()
 
-DB_HOST   = "127.0.0.1"
-DB_PORT   = 3307
-DB_USER   = ""
-DB_PASS   = ""
-DB_NAME   = ""
+# Get database configuration from environment variables
+DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
+DB_PORT = int(os.getenv("DB_PORT", "3306"))
+DB_USER = os.getenv("DB_USER", "vietcoin")
+DB_PASS = os.getenv("DB_PASS", "vietcoin1234!")
+DB_NAME = os.getenv("DB_NAME", "craw_test")
 
-#CHROMEDRIVER_PATH = os.getenv("CHROMEDRIVER_PATH", os.path.join(os.getcwd(), "chromedriver", "chromedriver.exe"))
-CHROMEDRIVER_PATH = r""
+# Get chromedriver path from environment variable
+CHROMEDRIVER_PATH = os.getenv("CHROMEDRIVER_PATH", os.path.join(os.getcwd(), "chromedriver", "chromedriver"))
+
 WEBSITES = {
     "NAVER_DATALAB":     "https://datalab.naver.com/keyword/realtimeList.naver?where=main",
     "SIGNAL_BZ":         "https://signal.bz/",
