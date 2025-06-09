@@ -1,70 +1,342 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>DCProject: 저장된 토픽 목록</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DCProject Crawler Dashboard</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
+            color: #333;
         }
-        h1 {
-            margin-bottom: 20px;
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
         }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e1e8ed;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e1e8ed;
+        }
+
         table {
-            border-collapse: collapse;
             width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
         }
-        th, td {
-            border: 1px solid #AAA;
-            padding: 8px;
-            text-align: left;
+
+        thead {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
         }
+
         th {
-            background-color: #EEE;
+            padding: 18px 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
         }
-        tr:nth-child(even) {
-            background-color: #F9F9F9;
+
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: linear-gradient(135deg, #f093fb 10%, #f5576c 90%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e1e8ed;
+            vertical-align: top;
+        }
+
+        .website-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-signal {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .badge-naver {
+            background: linear-gradient(135deg, #2ed573, #1e90ff);
+            color: white;
+        }
+
+        .badge-google {
+            background: linear-gradient(135deg, #ffa726, #fb8c00);
+            color: white;
+        }
+
+        .title-cell {
+            font-weight: 600;
+            color: #2c3e50;
+            max-width: 300px;
+            word-wrap: break-word;
+        }
+
+        .content-cell {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            max-width: 200px;
+            line-height: 1.4;
+        }
+
+        .metric-cell {
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .date-cell {
+            font-size: 0.85rem;
+            color: #95a5a6;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #95a5a6;
+            font-size: 1.1rem;
+        }
+
+        .no-data::before {
+            content: "📊";
+            display: block;
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-3px) rotate(180deg);
+            box-shadow: 0 12px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            table {
+                font-size: 0.85rem;
+            }
+            
+            th, td {
+                padding: 12px 8px;
+            }
+        }
+
+        .loading {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
         }
     </style>
 </head>
 <body>
-    <h1>저장된 토픽 목록 (최신 100개)</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>사이트</th>
-                <th>제목 (Title)</th>
-                <th>내용 (Content)</th>
-                <th>조회 수 (Views)</th>
-                <th>댓글 수 (Comments)</th>
-                <th>토픽 생성 시각</th>
-                <th>메트릭 기록 시각</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if topics and topics|length > 0 %}
-                {% for row in topics %}
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Crawler Dashboard</h1>
+            <p class="subtitle">실시간 트렌딩 키워드 모니터링</p>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number">{{ topics|length if topics else 0 }}</div>
+                <div class="stat-label">Total Topics</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ moment().format('HH:mm') if moment else '실시간' }}</div>
+                <div class="stat-label">Last Update</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100</div>
+                <div class="stat-label">Max Items</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
                     <tr>
-                        <td>{{ row.website_name }}</td>
-                        <td>{{ row.title }}</td>
-                        <!-- content는 너무 길 수 있으므로 50자만 보여주고, 나머지는 "…" 처리 -->
-                        <td>{{ row.content[:50] }}{% if row.content|length > 50 %}...{% endif %}</td>
-                        <td>{{ row.view_count }}</td>
-                        <td>{{ row.comment_count }}</td>
-                        <td>{{ row.topic_created }}</td>
-                        <td>{{ row.metric_recorded }}</td>
+                        <th>🌐 Source</th>
+                        <th>📝 Title</th>
+                        <th>💬 Content</th>
+                        <th>👀 Views</th>
+                        <th>💭 Comments</th>
+                        <th>📅 Created</th>
+                        <th>⏰ Recorded</th>
                     </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="7" style="text-align:center; color:#888;">
-                        저장된 토픽이 없습니다.
-                    </td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
+                </thead>
+                <tbody>
+                    {% if topics and topics|length > 0 %}
+                        {% for row in topics %}
+                            <tr>
+                                <td>
+                                    {% if 'SIGNAL' in row.website_name %}
+                                        <span class="website-badge badge-signal">{{ row.website_name }}</span>
+                                    {% elif 'NAVER' in row.website_name %}
+                                        <span class="website-badge badge-naver">{{ row.website_name }}</span>
+                                    {% elif 'GOOGLE' in row.website_name %}
+                                        <span class="website-badge badge-google">{{ row.website_name }}</span>
+                                    {% else %}
+                                        <span class="website-badge">{{ row.website_name }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="title-cell">{{ row.title }}</td>
+                                <td class="content-cell">{{ row.content[:50] if row.content else '내용 없음' }}{% if row.content and row.content|length > 50 %}...{% endif %}</td>
+                                <td class="metric-cell">{{ row.view_count }}</td>
+                                <td class="metric-cell">{{ row.comment_count }}</td>
+                                <td class="date-cell">{{ row.topic_created.strftime('%m-%d %H:%M') if row.topic_created else 'N/A' }}</td>
+                                <td class="date-cell">{{ row.metric_recorded.strftime('%m-%d %H:%M') if row.metric_recorded else 'N/A' }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="no-data">
+                                아직 수집된 데이터가 없습니다.<br>
+                                크롤러가 실행되면 여기에 트렌딩 키워드가 표시됩니다.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="location.reload()" title="새로고침">
+        🔄
+    </button>
+
+    <script>
+        // 자동 새로고침 (5분마다)
+        setTimeout(() => {
+            location.reload();
+        }, 300000);
+
+        // 페이지 로드 애니메이션
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    row.style.transition = 'all 0.5s ease';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
 </body>
 </html>
