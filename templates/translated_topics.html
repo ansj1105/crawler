@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DCProject Crawler - Translated Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e1e8ed;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .language-selector {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            color: white;
+            text-align: center;
+        }
+
+        .language-info {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .language-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .lang-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e1e8ed;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        th {
+            padding: 18px 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: linear-gradient(135deg, #4facfe 10%, #00f2fe 90%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e1e8ed;
+            vertical-align: top;
+        }
+
+        .website-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-signal {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .original-title {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .translated-title {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+
+        .translation-flag {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 2px 6px;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .content-cell {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            max-width: 200px;
+            line-height: 1.4;
+        }
+
+        .metric-cell {
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .date-cell {
+            font-size: 0.85rem;
+            color: #95a5a6;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #95a5a6;
+            font-size: 1.1rem;
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-3px) rotate(180deg);
+            box-shadow: 0 12px 25px rgba(79, 172, 254, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .language-buttons {
+                gap: 5px;
+            }
+            
+            .lang-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            
+            table {
+                font-size: 0.85rem;
+            }
+            
+            th, td {
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌍 Multilingual Dashboard</h1>
+            <p class="subtitle">AI 번역으로 전 세계 언어로 보는 트렌딩 키워드</p>
+        </div>
+
+        <div class="language-selector">
+            <div class="language-info">
+                현재 언어: {{ language_name }} <span class="translation-flag">{{ target_language.upper() }}</span>
+            </div>
+            <div class="language-buttons">
+                <a href="/topics/translate/ko" class="lang-btn {{ 'active' if target_language == 'ko' else '' }}">🇰🇷 한국어</a>
+                <a href="/topics/translate/en" class="lang-btn {{ 'active' if target_language == 'en' else '' }}">🇺🇸 English</a>
+                <a href="/topics/translate/ja" class="lang-btn {{ 'active' if target_language == 'ja' else '' }}">🇯🇵 日本語</a>
+                <a href="/topics/translate/zh" class="lang-btn {{ 'active' if target_language == 'zh' else '' }}">🇨🇳 中文</a>
+                <a href="/topics/translate/fr" class="lang-btn {{ 'active' if target_language == 'fr' else '' }}">🇫🇷 Français</a>
+                <a href="/topics/translate/es" class="lang-btn {{ 'active' if target_language == 'es' else '' }}">🇪🇸 Español</a>
+                <a href="/topics/translate/de" class="lang-btn {{ 'active' if target_language == 'de' else '' }}">🇩🇪 Deutsch</a>
+                <a href="/topics/translate/ru" class="lang-btn {{ 'active' if target_language == 'ru' else '' }}">🇷🇺 Русский</a>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number">{{ total_topics }}</div>
+                <div class="stat-label">Translated Topics</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ language_name }}</div>
+                <div class="stat-label">Target Language</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">AI</div>
+                <div class="stat-label">Translation Engine</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>🌐 Source</th>
+                        <th>📝 Title ({{ target_language.upper() }})</th>
+                        <th>💬 Content</th>
+                        <th>👀 Views</th>
+                        <th>💭 Comments</th>
+                        <th>📅 Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if topics and topics|length > 0 %}
+                        {% for row in topics %}
+                            <tr>
+                                <td>
+                                    <span class="website-badge badge-signal">{{ row.website_name }}</span>
+                                </td>
+                                <td>
+                                    <div class="title-group">
+                                        {% if row.translated_title != row.original_title %}
+                                            <div class="original-title">원본: {{ row.original_title }}</div>
+                                        {% endif %}
+                                        <div class="translated-title">
+                                            {{ row.translated_title }}
+                                            {% if row.translated_title != row.original_title %}
+                                                <span class="translation-flag">{{ target_language.upper() }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="content-cell">{{ row.content[:50] if row.content else '내용 없음' }}{% if row.content and row.content|length > 50 %}...{% endif %}</td>
+                                <td class="metric-cell">{{ row.view_count }}</td>
+                                <td class="metric-cell">{{ row.comment_count }}</td>
+                                <td class="date-cell">{{ row.topic_created.strftime('%m-%d %H:%M') if row.topic_created else 'N/A' }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="no-data">
+                                번역할 데이터가 없습니다.<br>
+                                크롤러가 실행되면 여기에 번역된 키워드가 표시됩니다.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="location.reload()" title="새로고침">
+        🔄
+    </button>
+
+    <script>
+        // 자동 새로고침 (10분마다)
+        setTimeout(() => {
+            location.reload();
+        }, 600000);
+
+        // 페이지 로드 애니메이션
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    row.style.transition = 'all 0.5s ease';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html> 

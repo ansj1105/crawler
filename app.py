@@ -1,6 +1,8 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
 import mysql.connector
 from mysql.connector import Error
+from google.cloud import translate_v2 as translate
+import os
 
 
 DB_HOST   = "127.0.0.1"
@@ -28,6 +30,13 @@ def get_db_connection():
         return None
 
 app = Flask(__name__)
+
+# Google Translate 클라이언트 초기화
+try:
+    translate_client = translate.Client()
+except Exception as e:
+    print(f"Google Translate 초기화 실패: {e}")
+    translate_client = None
 
 @app.route("/")
 def index():
@@ -190,6 +199,10 @@ def index():
                     <span>📊</span>
                     대시보드 보기
                 </a>
+                <a href="/topics/translate/en" class="btn btn-secondary">
+                    <span>🌍</span>
+                    다국어 번역
+                </a>
                 <a href="/api/topics" class="btn btn-secondary">
                     <span>⚡</span>
                     API 데이터
@@ -287,6 +300,186 @@ def page_topics():
     finally:
         cursor.close()
         conn.close()
+
+@app.route("/api/topics/translate")
+@app.route("/api/topics/translate/<lang_code>")
+def api_translate_topics(lang_code='en'):
+    """
+    Topics의 title을 지정된 언어로 번역하여 반환
+    지원 언어: en(영어), ja(일본어), zh(중국어), fr(프랑스어), es(스페인어), de(독일어) 등
+    """
+    # URL 파라미터로도 언어 지정 가능
+    if 'lang' in request.args:
+        lang_code = request.args.get('lang', 'en')
+    
+    # 번역 클라이언트가 없으면 에러 반환
+    if translate_client is None:
+        return {"error": "번역 서비스를 사용할 수 없습니다"}, 500
+    
+    # 지원 언어 목록
+    supported_languages = {
+        'en': 'English',
+        'ja': 'Japanese', 
+        'zh': 'Chinese',
+        'fr': 'French',
+        'es': 'Spanish',
+        'de': 'German',
+        'ru': 'Russian',
+        'pt': 'Portuguese',
+        'it': 'Italian',
+        'ko': 'Korean'
+    }
+    
+    if lang_code not in supported_languages:
+        return {
+            "error": f"지원하지 않는 언어입니다. 지원 언어: {list(supported_languages.keys())}"
+        }, 400
+
+    conn = get_db_connection()
+    if conn is None:
+        return {"error": "DB 연결 실패"}, 500
+
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # 제한된 수의 최신 토픽만 가져오기 (번역 비용 절약)
+        limit = int(request.args.get('limit', 50))
+        if limit > 100:
+            limit = 100
+            
+        sql = """
+        SELECT
+          w.name            AS website_name,
+          t.title           AS title,
+          t.content         AS content,
+          m.views           AS view_count,
+          m.comments        AS comment_count,
+          t.created_at      AS topic_created,
+          m.recorded_at     AS metric_recorded
+        FROM Topics AS t
+        JOIN websites AS w   ON t.website_id = w.website_id
+        JOIN Metrics  AS m   ON t.topic_id     = m.topic_id
+        ORDER BY t.created_at DESC
+        LIMIT %s;
+        """
+        cursor.execute(sql, (limit,))
+        topics = cursor.fetchall()
+        
+        # 번역 작업
+        translated_topics = []
+        translation_errors = []
+        
+        for topic in topics:
+            try:
+                original_title = topic['title']
+                
+                # 한국어가 아닌 경우에만 번역 (이미 한국어면 번역 안함)
+                if lang_code == 'ko':
+                    translated_title = original_title
+                else:
+                    # Google Translate API 호출
+                    result = translate_client.translate(
+                        original_title,
+                        target_language=lang_code,
+                        source_language='ko'  # 소스가 한국어라고 가정
+                    )
+                    translated_title = result['translatedText']
+                
+                # 번역된 정보 추가
+                topic_with_translation = topic.copy()
+                topic_with_translation.update({
+                    'original_title': original_title,
+                    'translated_title': translated_title,
+                    'target_language': lang_code,
+                    'language_name': supported_languages[lang_code]
+                })
+                
+                translated_topics.append(topic_with_translation)
+                
+            except Exception as e:
+                translation_errors.append({
+                    'title': topic['title'],
+                    'error': str(e)
+                })
+                # 번역 실패해도 원본 제목으로 추가
+                topic_with_translation = topic.copy()
+                topic_with_translation.update({
+                    'original_title': topic['title'],
+                    'translated_title': topic['title'],  # 번역 실패시 원본 사용
+                    'target_language': lang_code,
+                    'language_name': supported_languages[lang_code],
+                    'translation_error': str(e)
+                })
+                translated_topics.append(topic_with_translation)
+
+        response_data = {
+            "target_language": lang_code,
+            "language_name": supported_languages[lang_code],
+            "total_topics": len(translated_topics),
+            "topics": translated_topics
+        }
+        
+        if translation_errors:
+            response_data["translation_errors"] = translation_errors
+            
+        return response_data, 200
+
+    except Error as e:
+        print("[DB] Error in /api/topics/translate:", e)
+        return {"error": str(e)}, 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route("/api/languages")
+def api_supported_languages():
+    """지원하는 번역 언어 목록 반환"""
+    languages = {
+        'ko': '한국어 (Korean)',
+        'en': '영어 (English)',
+        'ja': '일본어 (Japanese)', 
+        'zh': '중국어 (Chinese)',
+        'fr': '프랑스어 (French)',
+        'es': '스페인어 (Spanish)',
+        'de': '독일어 (German)',
+        'ru': '러시아어 (Russian)',
+        'pt': '포르투갈어 (Portuguese)',
+        'it': '이탈리아어 (Italian)'
+    }
+    
+    return {
+        "supported_languages": languages,
+        "usage_examples": [
+            "/api/topics/translate/en - 영어로 번역",
+            "/api/topics/translate/ja - 일본어로 번역", 
+            "/api/topics/translate?lang=zh&limit=20 - 중국어로 번역 (20개 제한)"
+        ]
+    }, 200
+
+@app.route("/topics/translate")
+@app.route("/topics/translate/<lang_code>")
+def page_translated_topics(lang_code='en'):
+    """번역된 토픽을 보여주는 웹 페이지"""
+    # URL 파라미터로도 언어 지정 가능
+    if 'lang' in request.args:
+        lang_code = request.args.get('lang', 'en')
+    
+    # API에서 번역된 데이터 가져오기
+    try:
+        # 내부적으로 번역 API 호출
+        response_data, status_code = api_translate_topics(lang_code)
+        
+        if status_code != 200:
+            return f"<h2>번역 오류: {response_data.get('error', '알 수 없는 오류')}</h2>"
+        
+        return render_template("translated_topics.html", 
+                             topics=response_data['topics'],
+                             target_language=response_data['target_language'],
+                             language_name=response_data['language_name'],
+                             total_topics=response_data['total_topics'])
+                             
+    except Exception as e:
+        return f"<h2>페이지 로드 오류: {str(e)}</h2>"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
