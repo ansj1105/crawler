@@ -12,15 +12,14 @@ from selenium.webdriver.support import expected_conditions as EC
 import mysql.connector
 from mysql.connector import Error
 
-
 DB_HOST   = "127.0.0.1"
-DB_PORT   = 3307
-DB_USER   = ""
-DB_PASS   = ""
-DB_NAME   = ""
+DB_PORT=3306
+DB_USER="vietcoin"
+DB_PASS="vietcoin1234!"
+DB_NAME="craw_test"
 
 #CHROMEDRIVER_PATH = os.getenv("CHROMEDRIVER_PATH", os.path.join(os.getcwd(), "chromedriver", "chromedriver.exe"))
-CHROMEDRIVER_PATH = r""
+CHROMEDRIVER_PATH = os.path.join(os.getcwd(), "chromedriver", "chromedriver")
 WEBSITES = {
     "NAVER_DATALAB":     "https://datalab.naver.com/keyword/realtimeList.naver?where=main",
     "SIGNAL_BZ":         "https://signal.bz/",

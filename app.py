@@ -4,10 +4,11 @@ from mysql.connector import Error
 
 
 DB_HOST   = "127.0.0.1"
-DB_PORT   = 3307
-DB_USER   = "sytem"
-DB_PASS   = ""          # 실제 비밀번호
-DB_NAME   = ""
+DB_PORT=3306
+DB_USER="vietcoin"
+DB_PASS="vietcoin1234!"
+DB_NAME="craw_test"
+
 
 def get_db_connection():
 
